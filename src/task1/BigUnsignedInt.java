@@ -36,6 +36,39 @@ public class BigUnsignedInt {
         return new BigUnsignedInt(result.reverse().toString());
     }
 
+    public boolean greaterThan(BigUnsignedInt other) {
+        if (value.size() != other.value.size()) return value.size() > other.value.size();
+        for (int i = value.size() - 1; i >= 0; i--) {
+            if (!value.get(i).equals(other.value.get(i))) {
+                return value.get(i) > other.value.get(i);
+            }
+        }
+        return false;
+    }
+
+    public boolean lessThan(BigUnsignedInt other) {
+        return (!(greaterThan(other) || equals(other)));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj instanceof BigUnsignedInt) {
+            BigUnsignedInt other = (BigUnsignedInt) obj;
+            return value.equals(other.value);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 0;
+        for (Byte i: value) {
+            result = ((result << 3) | (result >> 29)) ^ i;
+        }
+        return result;
+    }
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
