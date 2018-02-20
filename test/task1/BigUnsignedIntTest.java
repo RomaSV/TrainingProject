@@ -11,7 +11,26 @@ public class BigUnsignedIntTest {
         String val1 = "123456789000000001";
         String val2 = "999999999";
         assertEquals(new BigUnsignedInt("123456790000000000"),
-                new BigUnsignedInt(val1).plus(new BigUnsignedInt(val2)));
+                new BigUnsignedInt (val1).plus(new BigUnsignedInt(val2)));
+    }
+
+    @Test
+    public void minus() {
+        assertEquals(new BigUnsignedInt("958"),
+                new BigUnsignedInt("1000").minus(new BigUnsignedInt("42")));
+        assertEquals(new BigUnsignedInt("1"),
+                new BigUnsignedInt("10000000000000000000000000000000000000000")
+                .minus(new BigUnsignedInt("9999999999999999999999999999999999999999")));
+        assertEquals(new BigUnsignedInt("0"),
+                new BigUnsignedInt("1").minus(new BigUnsignedInt("20")));
+    }
+
+    @Test
+    public void times() {
+        assertEquals(new BigUnsignedInt("666"),
+                new BigUnsignedInt("111").times(new BigUnsignedInt("6")));
+        assertEquals(new BigUnsignedInt("1493745"),
+                new BigUnsignedInt("12345").times(new BigUnsignedInt("121")));
     }
 
     @Test
@@ -22,6 +41,14 @@ public class BigUnsignedIntTest {
                 new BigUnsignedInt("12345").normalizedValue(5).toArray());
         assertArrayEquals(new Byte[]{5, 4, 3, 2, 1},
                 new BigUnsignedInt("12345").normalizedValue(3).toArray());
+    }
+
+    @Test
+    public  void multiplyByDigit() {
+        assertEquals(new BigUnsignedInt("861"),
+                new BigUnsignedInt("123").multiplyByDigit((byte)7));
+        assertEquals(new BigUnsignedInt("0"),
+                new BigUnsignedInt("10101010101010101010").multiplyByDigit((byte)0));
     }
 
     @Test
