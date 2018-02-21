@@ -7,12 +7,23 @@ public class BigUnsignedInt {
     private final List<Byte> value = new ArrayList<>();
 
     public BigUnsignedInt(String value) {
-        String revValue = new StringBuilder(value).reverse().toString();
+        if (!value.matches("\\d+")) {
+            throw new IllegalArgumentException();
+        }
+
+        //Clear redundant 0s
+        StringBuilder val = new StringBuilder(value);
+        while (val.length() > 1 && val.charAt(0) == '0') {
+            val.deleteCharAt(0);
+        }
+
+        String revValue = val.reverse().toString();
         for (Character digit: revValue.toCharArray()) {
             this.value.add((byte)Character.getNumericValue(digit));
         }
     }
 
+    /** Returns the sum of two numbers. */
     public BigUnsignedInt plus(BigUnsignedInt other) {
         StringBuilder result = new StringBuilder();
         boolean flag = false;
@@ -36,8 +47,14 @@ public class BigUnsignedInt {
         return new BigUnsignedInt(result.reverse().toString());
     }
 
+    /**
+     * A minus operation.
+     * @return the (number - argument). Negative results are 0.
+     */
     public BigUnsignedInt minus(BigUnsignedInt other) {
-        if (!this.greaterThan(other)) return new BigUnsignedInt("0");
+        if (!this.greaterThan(other)) {
+            return new BigUnsignedInt("0");
+        }
 
         StringBuilder result = new StringBuilder();
         boolean flag = false;
@@ -57,17 +74,14 @@ public class BigUnsignedInt {
                 flag = false;
             }
         }
-
-        result = result.reverse();
-        while (result.charAt(0) == '0') {
-            result.deleteCharAt(0);
-        }
-
-        return new BigUnsignedInt(result.toString());
+        return new BigUnsignedInt(result.reverse().toString());
     }
 
+    /** Returns the multiplication of two numbers. */
     public BigUnsignedInt times(BigUnsignedInt other) {
-        if (other.value.size() == 1) return this.multiplyByDigit(other.value.get(0));
+        if (other.value.size() == 1) {
+            return this.multiplyByDigit(other.value.get(0));
+        }
 
         BigUnsignedInt result = new BigUnsignedInt("0");
         for (int i = 0; i < other.value.size(); i++) {
@@ -77,12 +91,14 @@ public class BigUnsignedInt {
             }
             result = result.plus(val);
         }
-
         return result;
     }
 
+    /** Returns true if the number is greater than (and not equals) the argument */
     public boolean greaterThan(BigUnsignedInt other) {
-        if (value.size() != other.value.size()) return value.size() > other.value.size();
+        if (value.size() != other.value.size()) {
+            return value.size() > other.value.size();
+        }
         for (int i = value.size() - 1; i >= 0; i--) {
             if (!value.get(i).equals(other.value.get(i))) {
                 return value.get(i) > other.value.get(i);
@@ -91,12 +107,16 @@ public class BigUnsignedInt {
         return false;
     }
 
+    /** Returns true if the number is less than (and not equals) the argument */
     public boolean lessThan(BigUnsignedInt other) {
         return (!(greaterThan(other) || equals(other)));
     }
 
+    /** Returns a fixed-size value with 0s at blanks*/
     List<Byte> normalizedValue(int size) {
-        if (size < value.size()) return value;
+        if (size < value.size()) {
+            return value;
+        }
 
         List<Byte> result = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -109,9 +129,15 @@ public class BigUnsignedInt {
         return result;
     }
 
+    /** Returns the multiplication of BigUnsignedInt by a single-digit number. */
     BigUnsignedInt multiplyByDigit(byte digit) {
-        if (digit > 9) throw new IllegalArgumentException("The argument should be 0-9");
-        if (digit == 0) return new BigUnsignedInt("0");
+        if (digit > 9) {
+            throw new IllegalArgumentException("The argument should be 0-9");
+        }
+        if (digit == 0) {
+            return new BigUnsignedInt("0");
+        }
+
         StringBuilder result = new StringBuilder();
         byte carry = 0;
         for (Byte d : value) {
@@ -130,7 +156,9 @@ public class BigUnsignedInt {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
+        if (this == obj) {
+            return true;
+        }
         if (obj instanceof BigUnsignedInt) {
             BigUnsignedInt other = (BigUnsignedInt) obj;
             return value.equals(other.value);
@@ -141,7 +169,7 @@ public class BigUnsignedInt {
     @Override
     public int hashCode() {
         int result = 0;
-        for (Byte i: value) {
+        for (Byte i : value) {
             result = ((result << 3) | (result >> 29)) ^ i;
         }
         return result;
@@ -150,7 +178,7 @@ public class BigUnsignedInt {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        for (byte i: value) {
+        for (byte i : value) {
             result.append(i);
         }
         return result.reverse().toString();
