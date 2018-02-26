@@ -5,6 +5,27 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BigUnsignedIntTest {
     @Test
+    public void illegalArgument() {
+        try {
+            new BigUnsignedInt(-1);
+            fail("Exception expected");
+        } catch (IllegalArgumentException exception) {
+            assertEquals("The argument must be an integer number.", exception.getMessage());
+        }
+        try {
+            new BigUnsignedInt("12345abcdefg");
+            fail("Exception expected");
+        } catch (IllegalArgumentException exception) {
+            assertEquals("The argument must be an integer number.", exception.getMessage());
+        }
+    }
+
+    @Test
+    public void cleanZeroes() {
+        assertTrue(new BigUnsignedInt("007").equals(new BigUnsignedInt(7)));
+    }
+
+    @Test
     public void plus() {
         assertEquals(new BigUnsignedInt(580245),
                 new BigUnsignedInt(123456).plus(new BigUnsignedInt(456789)));
@@ -31,6 +52,9 @@ public class BigUnsignedIntTest {
                 new BigUnsignedInt(111).times(new BigUnsignedInt(6)));
         assertEquals(new BigUnsignedInt(1493745),
                 new BigUnsignedInt(12345).times(new BigUnsignedInt(121)));
+        assertEquals(new BigUnsignedInt("150902483962385603717531262"),
+                new BigUnsignedInt("135798642")
+                        .times(new BigUnsignedInt("1111222334332221111")));
     }
 
     @Test
@@ -48,6 +72,12 @@ public class BigUnsignedIntTest {
         assertEquals(new BigUnsignedInt("314159265358979323846264338327950288419716939937510"),
                 new BigUnsignedInt("38785094135818519639450924855178371559922137693590845255390")
                         .divideBy(new BigUnsignedInt(123456789)));
+        try {
+            new BigUnsignedInt(1).divideBy(new BigUnsignedInt(0));
+            fail("Exception expected");
+        } catch (ArithmeticException exception) {
+            assertEquals("You're trying to divide by zero.", exception.getMessage());
+        }
     }
 
     @Test
@@ -74,6 +104,12 @@ public class BigUnsignedIntTest {
                 new BigUnsignedInt(123).multiplyByDigit((byte)7));
         assertEquals(new BigUnsignedInt(0),
                 new BigUnsignedInt("10101010101010101010").multiplyByDigit((byte)0));
+        try {
+            new BigUnsignedInt(1).multiplyByDigit((byte)12);
+            fail("Exception expected");
+        } catch (IllegalArgumentException exception) {
+            assertEquals("The argument should be 0-9.", exception.getMessage());
+        }
     }
 
     @Test
