@@ -9,7 +9,7 @@ public class BigUnsignedInt {
 
     public BigUnsignedInt(String value) {
         if (!value.matches("\\d+")) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("The argument must be an integer number.");
         }
 
         //Clear redundant 0s
@@ -33,12 +33,15 @@ public class BigUnsignedInt {
         StringBuilder result = new StringBuilder();
         boolean flag = false;
         int maxLen = Math.max(value.size(), other.value.size());
+        List<Byte> thisNormalized = this.normalizedValue(maxLen);
+        List<Byte> otherNormalized = other.normalizedValue(maxLen);
+
         for (int i = 0; i < maxLen; i++) {
             final int sum;
             if (flag) {
-                sum = this.normalizedValue(maxLen).get(i) + other.normalizedValue(maxLen).get(i) + 1;
+                sum = thisNormalized.get(i) + otherNormalized.get(i) + 1;
             } else {
-                sum = this.normalizedValue(maxLen).get(i) + other.normalizedValue(maxLen).get(i);
+                sum = thisNormalized.get(i) + otherNormalized.get(i);
             }
 
             if (sum > 9) {
@@ -63,12 +66,13 @@ public class BigUnsignedInt {
 
         StringBuilder result = new StringBuilder();
         boolean flag = false;
+        List<Byte> otherNormalized = other.normalizedValue(value.size());
         for (int i = 0; i < value.size(); i++) {
             final int sum;
             if (flag) {
-                sum = value.get(i) - other.normalizedValue(value.size()).get(i) - 1;
+                sum = value.get(i) - otherNormalized.get(i) - 1;
             } else {
-                sum = value.get(i) - other.normalizedValue(value.size()).get(i);
+                sum = value.get(i) - otherNormalized.get(i);
             }
 
             if (sum < 0) {
@@ -143,10 +147,13 @@ public class BigUnsignedInt {
         return result;
     }
 
-    /** Returns the multiplication of BigUnsignedInt by a single-digit number. */
+    /**
+     * @return the multiplication of BigUnsignedInt by a single-digit number.
+     * @throws IllegalArgumentException if the argument is not a digit.
+     */
     BigUnsignedInt multiplyByDigit(byte digit) {
         if (digit > 9) {
-            throw new IllegalArgumentException("The argument should be 0-9");
+            throw new IllegalArgumentException("The argument should be 0-9.");
         }
         if (digit == 0) {
             return new BigUnsignedInt("0");
@@ -171,13 +178,14 @@ public class BigUnsignedInt {
     /**
      * Division with remainder.
      * @return pair, where the key is division result and the value is mod result.
+     * @throws ArithmeticException if the argument is 0.
      */
     Pair<BigUnsignedInt, BigUnsignedInt> divWithMod(BigUnsignedInt other) {
         if (this.lessThan(other)) {
             return new Pair<>(new BigUnsignedInt("0"), new BigUnsignedInt(this.toString()));
         }
         if (other.equals(new BigUnsignedInt("0"))) {
-            throw new ArithmeticException();
+            throw new ArithmeticException("You're trying to divide by zero.");
         }
 
         StringBuilder result = new StringBuilder();
