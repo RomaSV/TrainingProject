@@ -94,6 +94,38 @@ public class BigUnsignedInt {
         return result;
     }
 
+    /** Returns integer-division of two numbers. */
+    public BigUnsignedInt divideBy(BigUnsignedInt other) {
+        if (this.lessThan(other)) {
+            return new BigUnsignedInt("0");
+        }
+        if (other.equals(new BigUnsignedInt("0"))) {
+            throw new ArithmeticException();
+        }
+
+        StringBuilder result = new StringBuilder();
+        String modValue = this.toString().substring(0, other.value.size() - 1);
+        BigUnsignedInt mod = (other.value.size() != 1)? new BigUnsignedInt(modValue): new BigUnsignedInt("0");
+        for (int i = value.size() - other.value.size(); i >= 0; i--) {
+            BigUnsignedInt tmp = new BigUnsignedInt(mod.toString() + value.get(i));
+            Byte digit = 0;
+            if (!tmp.lessThan(other)) {
+                for (int j = 1; j <= 9; j++) {
+                    tmp = tmp.minus(other);
+                    if (tmp.lessThan(other)) {
+                        digit = (byte) j;
+                        mod = tmp;
+                        break;
+                    }
+                }
+            } else {
+                mod = tmp;
+            }
+            result.append(digit);
+        }
+        return new BigUnsignedInt(result.toString());
+    }
+
     /** Returns true if the number is greater than (and not equals) the argument */
     public boolean greaterThan(BigUnsignedInt other) {
         if (value.size() != other.value.size()) {

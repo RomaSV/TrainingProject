@@ -34,6 +34,25 @@ public class BigUnsignedIntTest {
     }
 
     @Test
+    public void divideBy() {
+        assertEquals(new BigUnsignedInt("0"),
+                new BigUnsignedInt("1").divideBy(new BigUnsignedInt("2018")));
+        assertEquals(new BigUnsignedInt("210021"),
+                new BigUnsignedInt("420042").divideBy(new BigUnsignedInt("2")));
+        assertEquals(new BigUnsignedInt("12345"),
+                new BigUnsignedInt("12345").divideBy(new BigUnsignedInt("1")));
+        assertEquals(new BigUnsignedInt("12341234"),
+                new BigUnsignedInt("24682468").divideBy(new BigUnsignedInt("2")));
+        assertEquals(new BigUnsignedInt("11"),
+                new BigUnsignedInt("121").divideBy(new BigUnsignedInt("11")));
+        assertEquals(new BigUnsignedInt("1666"),
+                new BigUnsignedInt("22542647").divideBy(new BigUnsignedInt("13531")));
+        assertEquals(new BigUnsignedInt("314159265358979323846264338327950288419716939937510"),
+                new BigUnsignedInt("38785094135818519639450924855178371559922137693590845255390")
+                        .divideBy(new BigUnsignedInt("123456789")));
+    }
+
+    @Test
     public void normalisedValue() {
         assertArrayEquals(new Byte[]{3, 2, 1, 0, 0, 0, 0, 0, 0, 0},
                 new BigUnsignedInt("123").normalizedValue(10).toArray());
