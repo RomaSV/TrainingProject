@@ -1,5 +1,6 @@
 package task1;
 
+import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,10 @@ public class BigUnsignedInt {
         for (Character digit: revValue.toCharArray()) {
             this.value.add((byte)Character.getNumericValue(digit));
         }
+    }
+
+    public BigUnsignedInt(Integer value) {
+        this(value.toString());
     }
 
     /** Returns the sum of two numbers. */
@@ -95,38 +100,15 @@ public class BigUnsignedInt {
     }
 
     /** Returns integer-division of two numbers. */
-    public BigUnsignedInt divideBy(BigUnsignedInt other) {
-        if (this.lessThan(other)) {
-            return new BigUnsignedInt("0");
-        }
-        if (other.equals(new BigUnsignedInt("0"))) {
-            throw new ArithmeticException();
-        }
-
-        StringBuilder result = new StringBuilder();
-        String modValue = this.toString().substring(0, other.value.size() - 1);
-        BigUnsignedInt mod = (other.value.size() != 1)? new BigUnsignedInt(modValue): new BigUnsignedInt("0");
-        for (int i = value.size() - other.value.size(); i >= 0; i--) {
-            BigUnsignedInt tmp = new BigUnsignedInt(mod.toString() + value.get(i));
-            Byte digit = 0;
-            if (!tmp.lessThan(other)) {
-                for (int j = 1; j <= 9; j++) {
-                    tmp = tmp.minus(other);
-                    if (tmp.lessThan(other)) {
-                        digit = (byte) j;
-                        mod = tmp;
-                        break;
-                    }
-                }
-            } else {
-                mod = tmp;
-            }
-            result.append(digit);
-        }
-        return new BigUnsignedInt(result.toString());
+    public BigUnsignedInt divideBy (BigUnsignedInt other) {
+        return divWithMod(other).getKey();
     }
 
-    /** Returns true if the number is greater than (and not equals) the argument */
+    public BigUnsignedInt mod (BigUnsignedInt other) {
+        return divWithMod(other).getValue();
+    }
+
+    /** Returns true if the number is greater than (and not equals) the argument. */
     public boolean greaterThan(BigUnsignedInt other) {
         if (value.size() != other.value.size()) {
             return value.size() > other.value.size();
@@ -139,12 +121,12 @@ public class BigUnsignedInt {
         return false;
     }
 
-    /** Returns true if the number is less than (and not equals) the argument */
+    /** Returns true if the number is less than (and not equals) the argument. */
     public boolean lessThan(BigUnsignedInt other) {
         return (!(greaterThan(other) || equals(other)));
     }
 
-    /** Returns a fixed-size value with 0s at blanks*/
+    /** Returns a fixed-size value with 0s at blanks. */
     List<Byte> normalizedValue(int size) {
         if (size < value.size()) {
             return value;
@@ -184,6 +166,41 @@ public class BigUnsignedInt {
             carry = (byte) (mult / 10);
         }
         return new BigUnsignedInt(result.reverse().toString());
+    }
+
+    /**
+     * Division with remainder.
+     * @return pair, where the key is division result and the value is mod result.
+     */
+    Pair<BigUnsignedInt, BigUnsignedInt> divWithMod(BigUnsignedInt other) {
+        if (this.lessThan(other)) {
+            return new Pair<>(new BigUnsignedInt("0"), new BigUnsignedInt(this.toString()));
+        }
+        if (other.equals(new BigUnsignedInt("0"))) {
+            throw new ArithmeticException();
+        }
+
+        StringBuilder result = new StringBuilder();
+        String modValue = this.toString().substring(0, other.value.size() - 1);
+        BigUnsignedInt mod = (other.value.size() != 1)? new BigUnsignedInt(modValue): new BigUnsignedInt("0");
+        for (int i = value.size() - other.value.size(); i >= 0; i--) {
+            BigUnsignedInt tmp = new BigUnsignedInt(mod.toString() + value.get(i));
+            Byte digit = 0;
+            if (!tmp.lessThan(other)) {
+                for (int j = 1; j <= 9; j++) {
+                    tmp = tmp.minus(other);
+                    if (tmp.lessThan(other)) {
+                        digit = (byte) j;
+                        mod = tmp;
+                        break;
+                    }
+                }
+            } else {
+                mod = tmp;
+            }
+            result.append(digit);
+        }
+        return new Pair<>(new BigUnsignedInt(result.toString()), mod);
     }
 
     @Override
