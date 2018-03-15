@@ -2,79 +2,77 @@ package task2;
 
 import java.io.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * Command-line util grep.
+ * Util grep.
  * Searching text data for lines that contain the  word  given.
  * Options:
- *      -r(regex)      instead of lines that contain  the  word
- *                     prints  lines  that  matches  the  regex
- *                     (CAN NOT BE  USED  WITH  OTHER  OPTIONS)
+ *      -r             instead of lines that contain  the  word
+ *                     prints  lines  that  contain  the  regex
  *      -i             ignore case
  *      -v             prints lines that DON'T contain the word
- * Example:
- *      -i -v word file_name       (normal search-mode)
- * Or:
- *      -r "expression" file_name  (for regex-mode)
- * Note, that regex itself MUST be quoted.
  */
 public class Grep {
-    public static void main(String[] args) throws IOException {
-        int argsLen = args.length;
-        boolean isRegexp = false;
-        boolean ignoreCase = false;
-        boolean inverse = false;
-        String result;
+    public static String[] grep(String inputName, String expression, boolean r, boolean i, boolean v) throws IOException {
+        File input = new File(inputName);
+        Stream<String> lines;
+        try (BufferedReader reader = new BufferedReader(new FileReader(input))) {
+            lines = reader.lines();
 
-        if (argsLen < 2) {
-            throw new IllegalArgumentException(
-                    String.format("Expected at least 2 arguments, %d given.", argsLen));
+            Predicate<String> predicate;
+            if (r) {
+                Pattern pattern =
+                        i? Pattern.compile(expression, Pattern.CASE_INSENSITIVE): Pattern.compile(expression);
+                predicate = line -> {
+                    Matcher matcher = pattern.matcher(line);
+                    return v ^ matcher.find();
+                };
+            } else if (i) {
+                predicate = line -> v ^ line.toLowerCase().contains(expression.toLowerCase());
+            } else {
+                predicate = line -> v ^ line.contains(expression);
+            }
+
+            return lines.filter(predicate).toArray(String[]::new);
         }
-        for (int i = 0; i < argsLen - 2; i++) {
-            switch (args[i]) {
+    }
+
+    /**
+     * Easier way to launch grep manually.
+     * @param inputName - Input file name
+     * @param expression - an expression to find in the file
+     * @param options - options, e.g. "-r -i -v"
+     */
+    public static String[] grep (String inputName, String expression, String options) throws IOException {
+        boolean r = false;
+        boolean i = false;
+        boolean v = false;
+        String[] ops = options.split(" ");
+
+        for (String o: ops) {
+            switch (o) {
                 case "-r":
-                case "-regex":
-                    isRegexp = true;
+                    r = true;
                     break;
                 case "-i":
-                    ignoreCase = true;
+                    i = true;
                     break;
                 case "-v":
-                    inverse = true;
+                    v = true;
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown option(s).");
+                    throw new IllegalArgumentException("Option " + o + " is unknown.");
             }
         }
 
-        File input = new File(args[argsLen - 1]);
-        BufferedReader reader = new BufferedReader(new FileReader(input));
-        result = grep(reader.lines(), args[argsLen - 2], isRegexp, ignoreCase, inverse);
-        reader.close();
-
-        System.out.println(result);
+        return grep(inputName, expression, r, i, v);
     }
 
-    static String grep(Stream<String> lines, Predicate<String> predicate) {
-        return lines.filter(predicate).collect(Collectors.joining("\n"));
-    }
-
-    static String grep(Stream<String> lines, String expression, boolean r, boolean i, boolean v) {
-        if (r && (i || v)) {
-            throw new IllegalArgumentException("You can't use -r with any other options.");
-        }
-
-        Predicate<String> predicate;
-        if (r) {
-            predicate = line -> line.matches(expression);
-        } else if (i) {
-            predicate = line -> v ^ line.toLowerCase().contains(expression.toLowerCase());
-        } else {
-            predicate = line -> v ^ line.contains(expression);
-        }
-
-        return grep(lines, predicate);
+    /** Launch grep with no options. */
+    public static String[] grep (String inputName, String expression) throws IOException {
+        return grep(inputName, expression, false, false, false);
     }
 }
